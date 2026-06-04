@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  # ---------------------------------------
+  # Core Graph Database (Deterministic Logic)
+  # ---------------------------------------
+  neo4j:
+    image: neo4j:5.20.0
+    container_name: grc-graph-db
+    ports:
+      - "7474:7474" # HTTP Browser UI
+      - "7687:7687" # Bolt Protocol (Python Driver)
+    environment:
+      - NEO4J_AUTH=neo4j/password123 # We will move this to .env later
+      - NEO4J_PLUGINS=["apoc"] # Essential graph data science library
+    volumes:
+      - neo4j_data:/data
+    restart: unless-stopped
+
+  # ---------------------------------------
+  # Staging Database (Human-in-the-Loop)
+  # ---------------------------------------
+  postgres:
+    image: postgres:15-alpine
+    container_name: grc-staging-db
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=adminpassword
+      - POSTGRES_DB=grc_staging
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  neo4j_data:
+  postgres_data:
