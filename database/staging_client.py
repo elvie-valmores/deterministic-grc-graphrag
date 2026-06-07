@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, Enum, Text
+from sqlalchemy import create_engine, Column, Integer, String, Enum, Text, Boolean
 from sqlalchemy.orm import declarative_base, sessionmaker
 import enum
 
@@ -15,6 +15,11 @@ class ApprovalStatus(enum.Enum):
     APPROVED = "APPROVED"
     REJECTED = "REJECTED"
 
+# --- NEW: Phase 1 Lifecycle Tracking ---
+class LifecycleStatus(enum.Enum):
+    ACTIVE = "ACTIVE"
+    RETIRED = "RETIRED"
+
 class StagingMapping(Base):
     __tablename__ = "compliance_mappings"
 
@@ -25,6 +30,11 @@ class StagingMapping(Base):
     relationship = Column(String)
     status = Column(Enum(ApprovalStatus), default=ApprovalStatus.PENDING)
     notes = Column(Text, nullable=True)
+    
+    # --- NEW: Phase 1 Audit Columns ---
+    version = Column(String, default="1.0")
+    lifecycle_status = Column(Enum(LifecycleStatus), default=LifecycleStatus.ACTIVE)
+    is_deleted = Column(Boolean, default=False)  # The Soft Delete flag
 
 def init_db():
     print("Initializing Staging Database...")
